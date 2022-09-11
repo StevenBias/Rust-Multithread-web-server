@@ -20,13 +20,11 @@ fn handle_connection(mut stream: TcpStream) {
     let buf_reader = BufReader::new(&mut stream);
     let request_line = buf_reader.lines().next().unwrap().unwrap();
 
-    let mut status_line = "HTTP/1.1 200 OK\r\n\r\n"; // 200 is a status code for success response
-    let mut filename = String::from("hello.html");
-
-    if request_line != "GET / HTTP/1.1" {
-        status_line = "HTTP/1.1 404 NOT FOUND";
-        filename = String::from("404.html");
-    }
+    let (status_line, filename) = if request_line == "GET / HTTP/1.1" {
+        ("HTTP/1.1 200 OK", "hello.html")
+    } else {
+        ("HTTP/1.1 404 NOT FOUND", "404.html")
+    };
 
     let contents = fs::read_to_string(filename).unwrap();
     let length = contents.len();
